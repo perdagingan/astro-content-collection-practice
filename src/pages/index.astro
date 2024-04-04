@@ -12,9 +12,7 @@ const posts = await getCollection("posts");
 		<div class="post-wrapper">
 			<h2>Posts</h2>
 			<div class="post-list">
-				{
-					posts.slice(0, 3).map((p) => <PostCard post={p} />)
-				}
+				{posts.slice(0, 3).map((p) => <PostCard post={p} />)}
 			</div>
 		</div>
 	</div>
