@@ -1,0 +1,55 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import MarkdownWrapper from "../../layouts/MarkdownWrapper.astro";
+import { getEntry } from "astro:content";
+import { Image } from "astro:assets";
+import { getEntries } from "astro:content";
+import PostCard from "../../components/PostCard.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  return posts.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+type Props = {
+  entry: CollectionEntry<"posts">;
+};
+
+const { entry } = Astro.props;
+const { Content } = await entry.render()
+const { data: authorData } = await getEntry("author", entry.data.author.id);
+
+const relatedPosts = entry.data.relatedPosts ? await getEntries(entry.data.relatedPosts) : [];
+
+---
+
+<MarkdownWrapper frontmatter={entry.data}>
+  <div class="meta">
+    <Image src={authorData.headshot} alt={authorData.name} width="25" height="25" />
+    <p>{authorData.name}</p>
+    <span>•</span>
+    <time datetime={entry.data.date.toISOString()}
+    >{
+      entry.data.date.toLocaleDateString(undefined, {
+        dateStyle: "medium",
+        timeZone: "UTC",
+      })
+    }</time>
+  </div>
+  <Content />
+  {
+    relatedPosts.length > 0 && (
+      <div class="post-wrapper">
+        <h2>Related Posts</h2>
+        <div>
+          {relatedPosts.map((p) => (
+              <PostCard post={p}/>
+            ))}
+        </div>
+      </div>
+    )
+  }
+</MarkdownWrapper>
